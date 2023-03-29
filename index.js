@@ -1,5 +1,6 @@
 const querystring = require("querystring")
 const iso8601 = require("./lib/iso8601-regex")
+const { Op } = require("sequelize")
 
 // Convert comma separated list to a sequelize projection (attributes array).
 // for example f('field1,field2,field3') -> ['field1','field2','field3']
@@ -55,6 +56,70 @@ function typedValue(value) {
 function typedValues(svalue) {
   const commaSplit = /("[^"]*")|('[^']*')|(\/[^\/]*\/i?)|([^,]+)/g
   return svalue.match(commaSplit).map(value => typedValue(value))
+}
+
+// Convert a key/value pair split at an equals sign into a sequelize comparison.
+// Converts value Strings to Numbers or Booleans when possible.
+// for example:
+// + f('key','value') => {key:'key',value:'value'}
+// + f('key>','value') => {key:'key',value:{$gte:'value'}}
+// + f('key') => {key:'key',value:{$exists: true}}
+// + f('!key') => {key:'key',value:{$exists: false}}
+// + f('key:op','value') => {key: 'key', value:{ $op: value}}
+// + f('key','op:value') => {key: 'key', value:{ $op: value}}
+function comparisonToSequelize(key, value) {
+  const join = value == "" ? key : key.concat("=", value)
+  const parts = join.match(/^(!?[^><!=:]+)(?:=?([><]=?|!?=|:.+=)(.+))?$/)
+  const hash = {}
+  let op
+  if (!parts) return null
+
+  key = parts[1]
+  op = parts[2]
+
+  if (!op) {
+    if (key[0] != "!") value = { [$exists]: true }
+    else {
+      key = key.substr(1)
+      value = { $exists: false }
+    }
+  } else if (op == "=" && parts[3] == "!") {
+    value = { $exists: false }
+  } else if (op == "=" || op == "!=") {
+    if (op == "=" && parts[3][0] == "!") op = "!="
+    const array = typedValues(parts[3])
+    if (array.length > 1) {
+      value = {}
+      op = op == "=" ? [Op.in] : [Op.notIn]
+      value[op] = array
+    } else if (op == "!=") {
+      value = array[0] instanceof RegExp ? { [Op.not]: array[0] } : { [Op.ne]: array[0] }
+    } else if (array[0][0] == "!") {
+      const sValue = array[0].substr(1)
+      const regex = sValue.match(/^\/(.*)\/(i?)$/)
+      value = regex ? { [Op.not]: new RegExp(regex[1], regex[2]) } : { [Op.ne]: sValue }
+    } else {
+      value = array[0]
+    }
+  } else if (op[0] == ":" && op[op.length - 1] == "=") {
+    op = "$" + op.substr(1, op.length - 2)
+    const array = []
+    parts[3].split(",").forEach(function (value) {
+      array.push(typedValue(value))
+    })
+    value = {}
+    value[op] = array.length == 1 ? array[0] : array
+  } else {
+    value = typedValue(parts[3])
+    if (op == ">") value = { [Op.gt]: value }
+    else if (op == ">=") value = { [Op.gte]: value }
+    else if (op == "<") value = { [Op.lt]: value }
+    else if (op == "<=") value = { [Op.lte]: value }
+  }
+
+  hash.key = key
+  hash.value = value
+  return hash
 }
 
 module.exports = function (query, options) {
