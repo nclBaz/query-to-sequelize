@@ -27,6 +27,29 @@ function sortToSequelize(sort) {
   return sortArray
 }
 
+// Convert String to Number, Date, or Boolean if possible. Also strips ! prefix
+function typedValue(value) {
+  if (value[0] == "!") value = value.substr(1)
+  const regex = value.match(/^\/(.*)\/(i?)$/)
+  const quotedString = value.match(/(["'])(?:\\\1|.)*?\1/)
+
+  if (regex) {
+    return new RegExp(regex[1], regex[2])
+  } else if (quotedString) {
+    return quotedString[0].substr(1, quotedString[0].length - 2)
+  } else if (value === "true") {
+    return true
+  } else if (value === "false") {
+    return false
+  } else if (iso8601.test(value) && value.length !== 4) {
+    return new Date(value)
+  } else if (isFinite(Number(value))) {
+    return Number(value)
+  }
+
+  return value
+}
+
 module.exports = function (query, options) {
   return { criteria: {}, options: {}, links: function (url, totalCount) {} }
 }
