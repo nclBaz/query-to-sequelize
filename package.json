@@ -1,0 +1,26 @@
+{
+  "name": "query-to-sequelize",
+  "version": "0.1.0",
+  "description": "Convert query parameters into Sequelize query criteria and options.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nclBaz/query-to-sequelize"
+  },
+  "scripts": {
+    "test": "tap -w"
+  },
+  "keywords": [
+    "sequelize",
+    "query"
+  ],
+  "author": "Riccardo Gulin <riccardo.gulin@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "tap": "^16.3.4"
+  },
+  "dependencies": {
+    "qs": "^6.11.1",
+    "sequelize": "^6.30.0"
+  }
+}
