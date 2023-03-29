@@ -123,7 +123,7 @@ function comparisonToSequelize(key, value) {
 
 // Checks for keys that are ordinal positions, such as {'0':'one','1':'two','2':'three'}
 function hasOrdinalKeys(obj) {
-  const c = 0
+  let c = 0
   for (const key in obj) {
     if (Number(key) !== c++) return false
   }
