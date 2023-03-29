@@ -1,6 +1,7 @@
 const assert = require("assert")
 const qs = require("qs")
 const tap = require("tap")
+const { Op } = require("sequelize")
 const q2s = require("../index")
 
 tap.test("query-to-sequelize(query,{parser: qs}) =>", t1 => {
@@ -47,7 +48,7 @@ tap.test("query-to-sequelize(query,{parser: qs}) =>", t1 => {
     t2.test("should create string criteria when forced with a quote", t3 => {
       const results = q2s("a='10'&b='11'&c='a,b'&d=10,11&z=\"that's all folks\"", { parser: qs })
       assert.ok(results.criteria)
-      assert.deepEqual(results.criteria, { a: "10", b: "11", c: "a,b", d: { $in: [10, 11] }, z: "that's all folks" })
+      assert.deepEqual(results.criteria, { a: "10", b: "11", c: "a,b", d: { [Op.in]: [10, 11] }, z: "that's all folks" })
       t3.end()
     })
 
@@ -64,13 +65,19 @@ tap.test("query-to-sequelize(query,{parser: qs}) =>", t1 => {
     t2.test("should create field option", t3 => {
       const results = q2s("fields=a,b,c", { parser: qs })
       assert.ok(results.options)
-      assert.deepEqual(results.options, { fields: { a: 1, b: 1, c: 1 } })
+      assert.deepEqual(results.options, { fields: ["a", "b", "c"] })
       t3.end()
     })
     t2.test("should create sort option", t3 => {
       const results = q2s("sort=a,+b,-c", { parser: qs })
       assert.ok(results.options)
-      assert.deepEqual(results.options, { sort: { a: 1, b: 1, c: -1 } })
+      assert.deepEqual(results.options, {
+        sort: [
+          ["a", "ASC"],
+          ["b", "ASC"],
+          ["c", "DESC"],
+        ],
+      })
       t3.end()
     })
     t2.test("should limit queries", t3 => {

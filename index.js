@@ -20,10 +20,11 @@ function omitFieldsToSequelize(omitFields) {
 // for example f('field1,+field2,-field3') -> [['field1', 'ASC'], ['field2', 'ASC'], ['field3', 'DESC']]
 function sortToSequelize(sort) {
   const sortArray = []
-  if (!sort) return sortArray
+  if (!sort) return null
   sort.split(",").forEach(function (field) {
-    const c = field.charAt(0) === "-"
-    sortArray.push([c ? field.substring(1) : field, c ? "DESC" : "ASC"])
+    const isMinusSymbol = field.charAt(0) === "-"
+    const isPlusSymbol = field.charAt(0) === "+"
+    sortArray.push([isMinusSymbol || isPlusSymbol || field.charAt(0) === " " ? field.substring(1) : field, isMinusSymbol ? "DESC" : "ASC"])
   })
   return sortArray
 }
