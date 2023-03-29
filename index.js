@@ -50,6 +50,13 @@ function typedValue(value) {
   return value
 }
 
+// Convert a comma separated string value to an array of values.  Commas
+// in a quoted strings and regexes are ignored.  Also strips ! prefix from values.
+function typedValues(svalue) {
+  const commaSplit = /("[^"]*")|('[^']*')|(\/[^\/]*\/i?)|([^,]+)/g
+  return svalue.match(commaSplit).map(value => typedValue(value))
+}
+
 module.exports = function (query, options) {
   return { criteria: {}, options: {}, links: function (url, totalCount) {} }
 }
