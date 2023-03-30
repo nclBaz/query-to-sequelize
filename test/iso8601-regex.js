@@ -1,7 +1,5 @@
 const assert = require("assert")
-const qs = require("qs")
 const tap = require("tap")
-const q2s = require("../index")
 const iso8601 = require("../lib/iso8601-regex")
 
 tap.pass("this is fine")

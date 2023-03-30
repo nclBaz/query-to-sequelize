@@ -64,8 +64,8 @@ function typedValues(svalue) {
 // for example:
 // + f('key','value') => {key:'key',value:'value'}
 // + f('key>','value') => {key:'key',value:{[Op.gt]:'value'}}
-// + f('key') => {key:'key',value:{[Op.is]: true}}
-// + f('!key') => {key:'key',value:{[Op.is]: false}}
+// + f('key') => {key:'key',value:{[Op.not]: null}}
+// + f('!key') => {key:'key',value:{[Op.is]: null}}
 // + f('key:op','value') => {key: 'key', value:{ [Op.op]: value}}
 function comparisonToSequelize(key, value) {
   const join = value === "" ? key : key.concat("=", value)
@@ -78,13 +78,13 @@ function comparisonToSequelize(key, value) {
   op = parts[2]
 
   if (!op) {
-    if (key[0] !== "!") value = { [Op.is]: true }
+    if (key[0] !== "!") value = { [Op.not]: null }
     else {
       key = key.substr(1)
-      value = { [Op.is]: false }
+      value = { [Op.is]: null }
     }
   } else if (op === "=" && parts[3] === "!") {
-    value = { [Op.is]: false }
+    value = { [Op.is]: null }
   } else if (op === "=" || op === "!=") {
     if (op === "=" && parts[3][0] === "!") op = "!="
     const array = typedValues(parts[3])
@@ -99,7 +99,7 @@ function comparisonToSequelize(key, value) {
       const regex = sValue.match(/^\/(.*)\/(i?)$/)
       value = regex ? { [Op.not]: new RegExp(regex[1], regex[2]) } : { [Op.ne]: sValue }
     } else {
-      value = array[0]
+      value = array[0] instanceof RegExp ? { [Op.regexp]: array[0] } : array[0]
     }
   } else if (op[0] === ":" && op[op.length - 1] === "=") {
     op = Symbol(op.substr(1, op.length - 2))

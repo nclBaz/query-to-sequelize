@@ -35,7 +35,7 @@ tap.test("query-to-sequelize(query,{parser: qs}) =>", t1 => {
     t2.test("should create regex criteria", t3 => {
       const results = q2s("foo[r]=/regex/&foo[ri]=/regexi/i", { parser: qs })
       assert.ok(results.criteria)
-      assert.deepEqual(results.criteria, { foo: { r: /regex/, ri: /regexi/i } })
+      assert.deepEqual(results.criteria, { foo: { r: { [Op.regexp]: /regex/ }, ri: { [Op.regexp]: /regexi/i } } })
       t3.end()
     })
     // can't create comparisons for embedded documents
