@@ -4,7 +4,7 @@ const tap = require("tap")
 const { Op } = require("sequelize")
 const q2s = require("../index")
 
-tap.test("query-to-mongo(query) =>", t1 => {
+tap.test("query-to-sequelize(query) =>", t1 => {
   t1.test(".criteria", t2 => {
     t2.test("should create criteria", t3 => {
       const results = q2s("field=value")

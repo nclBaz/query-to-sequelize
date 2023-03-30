@@ -1,9 +1,8 @@
 const assert = require("assert")
-const qs = require("qs")
 const tap = require("tap")
 const q2s = require("../index")
 
-tap.test("query-to-mongo(query).links =>", t1 => {
+tap.test("query-to-sequelize(query).links =>", t1 => {
   t1.test("#links", t2 => {
     const links = q2s("offset=20&limit=10").links("http://localhost", 95)
     t2.test("should create first link", t3 => {
