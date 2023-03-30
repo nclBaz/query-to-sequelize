@@ -1,6 +1,6 @@
 # query-to-sequelize
 
-** All credit goes to [query-to-mongo](https://github.com/pbatey/query-to-mongo) **
+** All credits goes to [query-to-mongo](https://github.com/pbatey/query-to-mongo) **
 
 Node.js package to convert query parameters into a [sequelize](https://sequelize.org/) query criteria and options
 
