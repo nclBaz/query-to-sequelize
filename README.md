@@ -67,7 +67,7 @@ console.log(query)
 - **maxLimit** The maximum limit (default is none)
 - **ignore** List of criteria to ignore in addition to keywords used for query options ("fields", "omit", "sort", "offset", "limit")
 - **parser** Query parser to use instead of _querystring_. Must implement `parse(string)` and `stringify(obj)`.
-- **keywords** Override the keywords used for query options ("fields", "omit", "sort", "skip", "limit"). For example: `{fields:'$fields', omit:'$omit', sort:'$sort', offset:'$skip', limit:'$limit'}` <-- TODO
+- **keywords** Override the keywords used for query options ("fields", "omit", "sort", "skip", "limit"). For example: `{fields:'$fields', omit:'$omit', sort:'$sort', offset:'$skip', limit:'$limit'}`
 
 #### returns:
 
@@ -164,17 +164,10 @@ Any query parameters other then the keywords _fields_, _omit_, _sort_, _offset_,
 - Multiple equals comparisons are merged into a `[Op.in]` operator. For example, `id=a&id=b` yields `{id: { [Op.in]: [ 'a', 'b' ] }}`.
 - Multiple not-equals comparisons are merged into a `[Op.notIn]` operator. For example, `id!=a&id!=b` yields `{id:{[Op.notIn]: ['a','b']}}`.
 - Comma separated values in equals or not-equals yield an `[Op.in]` or `[Op.notIn]` operator. For example, `id=a,b` yields `{id:{[Op.in]: ['a','b']}}`.
-- Regex patterns. For example, `name=/^john/i` yields `{id: /^john/i}`.
-- Parameters without a value check that the field is present. For example, `foo&bar=10` yields `{foo: {$exists: true}, bar: 10}`.
-- Parameters prefixed with a _not_ (!) and without a value check that the field is not present. For example, `!foo&bar=10` yields `{foo: {$exists: false}, bar: 10}`.
-- Supports some of the named comparision operators ($type, $size and $all).  For example, `foo:type=string`, yeilds `{ foo: {$type: 'string} }`.
+- Regex patterns. For example, `name=/^john/i` yields `{id: {[Op.regexp]: /^john/i}}`.
+- Parameters without a value check if the field is not null. For example, `foo&bar=10` yields `{foo: {[Op.not]: null}, bar: 10}`.
+- Parameters prefixed with a _not_ (!) and without a value check that the field is not present. For example, `!foo&bar=10` yields `{foo: {[Op.is]: null}, bar: 10}`.
 - Support for forced string comparison; value in single or double quotes (`field='10'` or `field="10"`) would force a string compare. Allows for string with embedded comma (`field="a,b"`) and quotes (`field="that's all folks"`).
-
-### A note on embedded documents
-
-Comparisons on embedded documents should use mongo's [dot notation](http://docs.mongodb.org/manual/reference/glossary/#term-dot-notation) instead of express's 'extended' [query parser](https://www.npmjs.com/package/qs) (Use `foo.bar=value` instead of `foo[bar]=value`).
-
-Although exact matches are handled for either method, comparisons (such as `foo[bar]!=value`) are not supported because the 'extended' parser expects an equals sign after the nested object reference; if it's not an equals the remainder is discarded.
 
 ### A note on overriding keywords
 
@@ -182,14 +175,14 @@ You can adjust the keywords (_fields_, _omit_, _sort_, _offset_, and _limit_) by
 
 ```
 altKeywords = {fields:'$fields', omit:'$omit', sort:'$sort', offset:'$offset', limit:'$limit'}
-var q = q2m(res.query, {keywords: altKeywords});
+const q = q2m(res.query, {keywords: altKeywords});
 ```
 
 This will then interpret the standard keywords as query parameters instead of options. For example a query of `age>21&omit=false&$omit=a` results in a _criteria_ value of:
 
 ```
 {
-  'age': { $gt: 21 },
+  'age': { [Op.gt]: 21 },
   'omit': false
 }
 ```
@@ -210,14 +203,6 @@ There's a _test_ script listed in package.json that will execute the mocha tests
 npm install
 npm test
 ```
-
-## Todo
-
-- Geospatial search
-- $text searches
-- $mod comparision
-- Bitwise comparisions
-- Escaping or double quoting in forced string comparison, ='That\'s all folks' or ='That''s all folks'
 
 ## Creating a Release
 
