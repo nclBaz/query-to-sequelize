@@ -33,13 +33,13 @@ tap.test("query-to-mongo(query) =>", t1 => {
     t2.test("should create regex criteria", t3 => {
       const results = q2s("r=/regex/&ri=/regexi/i")
       assert.ok(results.criteria)
-      assert.deepStrictEqual(results.criteria, { r: /regex/, ri: /regexi/i })
+      assert.deepStrictEqual(results.criteria, { r: { [Op.regexp]: /regex/ }, ri: { [Op.regexp]: /regexi/i } })
       t3.end()
     })
     t2.test("should create regex criteria with comma", t3 => {
       const results = q2s("r=/reg,ex/&ri=/reg,exi/i")
       assert.ok(results.criteria)
-      assert.deepStrictEqual(results.criteria, { r: /reg,ex/, ri: /reg,exi/i })
+      assert.deepStrictEqual(results.criteria, { r: { [Op.regexp]: /reg,ex/ }, ri: { [Op.regexp]: /reg,exi/i } })
       t3.end()
     })
     t2.test("should create Date criteria from YYYY-MM", t3 => {
@@ -218,22 +218,22 @@ tap.test("query-to-mongo(query) =>", t1 => {
       assert.deepStrictEqual(results.criteria, { field: "value" })
       t3.end()
     })
-    t2.test("should create [Op.is] criteria from value", t3 => {
+    t2.test("should create [Op.is] criteria or [Op.not] from value", t3 => {
       const results = q2s("a=&b=%21")
       assert.ok(results.criteria)
-      assert.deepStrictEqual(results.criteria, { a: { [Op.is]: true }, b: { [Op.is]: false } })
+      assert.deepStrictEqual(results.criteria, { a: { [Op.not]: null }, b: { [Op.is]: null } })
       t3.end()
     })
-    t2.test("should create [Op.is] true criteria", t3 => {
+    t2.test("should create [Op.not] null criteria", t3 => {
       const results = q2s("a&b=10&c", { ignore: ["c"] })
       assert.ok(results.criteria)
-      assert.deepStrictEqual(results.criteria, { a: { [Op.is]: true }, b: 10 })
+      assert.deepStrictEqual(results.criteria, { a: { [Op.not]: null }, b: 10 })
       t3.end()
     })
-    t2.test("should create [Op.is] false criteria", t3 => {
+    t2.test("should create [Op.is] null criteria", t3 => {
       const results = q2s("!a&b=10&c", { ignore: ["c"] })
       assert.ok(results.criteria)
-      assert.deepStrictEqual(results.criteria, { a: { [Op.is]: false }, b: 10 })
+      assert.deepStrictEqual(results.criteria, { a: { [Op.is]: null }, b: 10 })
       t3.end()
     })
     // t2.test("should create $type criteria with BSON type number", t3 => {
