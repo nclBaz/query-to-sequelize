@@ -99,7 +99,8 @@ function comparisonToSequelize(key, value) {
       const regex = sValue.match(/^\/(.*)\/(i?)$/)
       value = regex ? { [Op.not]: new RegExp(regex[1], regex[2]) } : { [Op.ne]: sValue }
     } else {
-      value = array[0]
+      value = array[0] instanceof RegExp ? { [Op.regexp]: array[0] } : array[0]
+      // <-- REGEX & DATE
     }
   } else if (op[0] === ":" && op[op.length - 1] === "=") {
     op = Symbol(op.substr(1, op.length - 2))
