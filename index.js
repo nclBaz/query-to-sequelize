@@ -78,10 +78,10 @@ function comparisonToSequelize(key, value) {
   op = parts[2]
 
   if (!op) {
-    if (key[0] !== "!") value = { [Op.is]: true }
+    if (key[0] !== "!") value = { [Op.not]: null }
     else {
       key = key.substr(1)
-      value = { [Op.is]: false }
+      value = { [Op.is]: null }
     }
   } else if (op === "=" && parts[3] === "!") {
     value = { [Op.is]: false }
@@ -100,7 +100,6 @@ function comparisonToSequelize(key, value) {
       value = regex ? { [Op.not]: new RegExp(regex[1], regex[2]) } : { [Op.ne]: sValue }
     } else {
       value = array[0] instanceof RegExp ? { [Op.regexp]: array[0] } : array[0]
-      // <-- REGEX & DATE
     }
   } else if (op[0] === ":" && op[op.length - 1] === "=") {
     op = Symbol(op.substr(1, op.length - 2))
