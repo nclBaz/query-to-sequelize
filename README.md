@@ -1,5 +1,7 @@
 # query-to-sequelize
 
+** All credit goes to [query-to-mongo](https://github.com/pbatey/query-to-mongo) **
+
 Node.js package to convert query parameters into a [sequelize](https://sequelize.org/) query criteria and options
 
 For example, a query such as: `name=john&age>21&fields=name,age&sort=name,-age&offset=10&limit=10` becomes the following hash:
