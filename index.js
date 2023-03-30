@@ -64,8 +64,8 @@ function typedValues(svalue) {
 // for example:
 // + f('key','value') => {key:'key',value:'value'}
 // + f('key>','value') => {key:'key',value:{[Op.gt]:'value'}}
-// + f('key') => {key:'key',value:{[Op.is]: true}}
-// + f('!key') => {key:'key',value:{[Op.is]: false}}
+// + f('key') => {key:'key',value:{[Op.not]: null}}
+// + f('!key') => {key:'key',value:{[Op.is]: null}}
 // + f('key:op','value') => {key: 'key', value:{ [Op.op]: value}}
 function comparisonToSequelize(key, value) {
   const join = value === "" ? key : key.concat("=", value)
@@ -84,7 +84,7 @@ function comparisonToSequelize(key, value) {
       value = { [Op.is]: null }
     }
   } else if (op === "=" && parts[3] === "!") {
-    value = { [Op.is]: false }
+    value = { [Op.is]: null }
   } else if (op === "=" || op === "!=") {
     if (op === "=" && parts[3][0] === "!") op = "!="
     const array = typedValues(parts[3])
