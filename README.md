@@ -35,7 +35,7 @@ await Model.findAll({where: criteria, limit: options.limit, offset: options.skip
 
 ```
 
-Comparision operators that are encoded into the value are also considered. For example, a query sucha as: `name=john&age=%3E21` becomes the following hash:
+Comparision operators that are encoded into the value are also considered. For example, a query such as: `name=john&age=%3E21` becomes the following hash:
 
 ```javascript
 {
